@@ -3,43 +3,55 @@ require_relative('../db/sql_runner')
 class Movie
 
   attr_reader :id
-  attr_accessor :title, :genre
+  attr_accessor :title, :genre, :budget
 
   def initialize( options )
     @id = options['id'].to_i if options['id']
     @genre = options['genre']
     @title = options['title']
+    @budget = options['budget']
   end
 
   def save()
     sql = "INSERT INTO movies
     (
-      title, genre
+      title, genre, budget
     )
     VALUES
     (
-      $1,$2
+      $1,$2,$3
     )
     RETURNING id"
-    values = [@title,@genre]
+    values = [@title,@genre,@budget]
     movie = SqlRunner.run( sql, values ).first
     @id = movie['id'].to_i
   end
 
   def update()
-    
+
     sql = "UPDATE movies SET
     (
-      title, genre
+      title, genre, budget
     )
     =
     (
-      $1,$2
+      $1,$2,$3
     )
-    WHERE id = $3"
-    values = [@title,@genre,@id]
+    WHERE id = $4"
+    values = [@title,@genre,@budget,@id]
     movie = SqlRunner.run( sql, values ).first
 
+  end
+
+  def stars()
+    sql = "SELECT stars.* FROM stars
+      INNER JOIN castings
+      ON castings.star_id = stars.id
+      WHERE movie_id = $1"
+      values = [@id]
+      stars = SqlRunner.run(sql,values)  #pull location from PG array-type object
+      result = stars.map {|star| Star.new(star)}
+      return result
   end
 
   def self.all()
@@ -64,17 +76,7 @@ class Movie
     movie = Movie.new(movie_hash)
     return movie
   end
-  # def locations()
-  #   sql = "SELECT locations.*
-  #   from locations
-  #   INNER JOIN visits ON visits.location_id = locations.id
-  #   WHERE visits.movie_id = $1
-  #   "
-  #   values = [@id]
-  #   locations = SqlRunner.run(sql,values)  #pull location from PG array-type object
-  #   results = locations.map {|location| Location.new(location)}
-  #   return results
-  # end
+
 
 
 end

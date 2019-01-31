@@ -42,6 +42,17 @@ class Star
 
   end
 
+  def movies()
+    sql = "SELECT movies.* FROM movies
+      INNER JOIN castings
+      ON castings.movie_id = movies.id
+      WHERE star_id = $1"
+      values = [@id]
+      movies = SqlRunner.run(sql, values)
+      result = movies.map { |movie| Movie.new(movie)}
+      return result
+  end
+
   def self.all()
     sql = "SELECT * FROM stars"
     values = []
@@ -64,17 +75,12 @@ class Star
     star = Star.new(star_hash)
     return star
   end
-  # def locations()
-  #   sql = "SELECT locations.*
-  #   from locations
-  #   INNER JOIN visits ON visits.location_id = locations.id
-  #   WHERE visits.Star_id = $1
-  #   "
-  #   values = [@id]
-  #   locations = SqlRunner.run(sql,values)  #pull location from PG array-type object
-  #   results = locations.map {|location| Location.new(location)}
-  #   return results
-  # end
 
+  def movies()
+    sql = "SELECT movies.* FROM movies
+      INNER JOIN castings
+      ON castings.movie_id = movies.id
+      WHERE star_id = 9"
+  end
 
 end
